@@ -1,0 +1,25 @@
+--- a/meson.build	2024-01-09 00:55:23.942130647 +0100
++++ b/meson.build	2024-01-09 01:21:36.911638528 +0100
+@@ -27,6 +27,9 @@
+     syslibdir = '/' / get_option('libdir')
+ endif
+ 
++with_tools = get_option('with_tools') != 'disabled'
++with_runtime = get_option('with_runtime') != 'disabled'
++
+ direct = get_option('direct') == 'enabled'
+ sgx = get_option('sgx') == 'enabled'
+ skeleton = get_option('skeleton') == 'enabled'
+@@ -278,8 +281,12 @@
+ 
+ subdir('common')
+ subdir('pal')
++if with_runtime
+ subdir('libos')
++endif
++if with_tools
+ subdir('python')
+ subdir('tools')
++endif
+ 
+ if get_option('libc') == 'glibc'

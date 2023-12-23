@@ -1,0 +1,45 @@
+{ lib
+, stdenv
+, systemd
+, nixsgx
+,
+}:
+stdenv.mkDerivation rec {
+  inherit (nixsgx.sgx-dcap) version;
+  pname = "libsgx-dcap-default-qpl";
+
+  outputs = [ "out" "dev" ];
+
+  nativeBuildInputs = [
+    systemd
+    nixsgx.sgx-dcap
+  ];
+
+  unpackPhase = ''
+    cp -av ${nixsgx.sgx-dcap}/${pname} .
+    chmod -R u+w .
+  '';
+
+  buildPhase = ''
+    mkdir out
+    make DESTDIR=$(pwd)/out -C ${pname}/output install
+  '';
+
+  # sigh... Intel!
+  installPhase = ''
+    runHook preInstall
+    mkdir $out
+    cp -av out/${pname}*/usr/. $out/
+    cp -av out/${pname}*/etc $out/
+    runHook postInstall
+  '';
+
+  doCheck = false;
+
+  meta = with lib; {
+    description = "Intel(R) Software Guard Extensions Data Center Attestation Primitives";
+    homepage = "https://github.com/intel/SGXDataCenterAttestationPrimitives";
+    platforms = [ "x86_64-linux" ];
+    license = with licenses; [ bsd3 ];
+  };
+}

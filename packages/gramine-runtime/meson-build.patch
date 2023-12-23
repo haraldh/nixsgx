@@ -1,0 +1,36 @@
+--- a/meson.build	2024-01-09 00:55:23.942130647 +0100
++++ b/meson.build	2024-01-09 00:59:19.371754165 +0100
+@@ -27,6 +27,9 @@
+     syslibdir = '/' / get_option('libdir')
+ endif
+ 
++with_tools = get_option('with_tools') != 'disabled'
++with_runtime = get_option('with_runtime') != 'disabled'
++
+ direct = get_option('direct') == 'enabled'
+ sgx = get_option('sgx') == 'enabled'
+ skeleton = get_option('skeleton') == 'enabled'
+@@ -277,11 +280,16 @@
+ #
+ 
+ subdir('common')
++if with_runtime
+ subdir('pal')
+ subdir('libos')
++endif
++if with_tools
+ subdir('python')
++endif
+ subdir('tools')
+ 
++if with_runtime
+ if get_option('libc') == 'glibc'
+     subproject('glibc-2.38-1')
+ elif get_option('libc') == 'musl'
+@@ -291,5 +299,6 @@
+ if enable_libgomp
+     subproject('gcc-10.2.0')
+ endif
++endif
+ 
+ run_target('clang-format', command: [meson_clang_format_prog])
