@@ -34,7 +34,11 @@ let
     hash = "sha256-FuUeBFXiiPAzgLQ25B1ZJ8YJRavYbQyYUrhL5X3W7V4=";
   };
 
-  python = pkgs.python3;
+  buildpython = pkgs.python3.withPackages (ps: with ps; [
+    sphinx
+    recommonmark
+    sphinx-rtd-theme
+  ]);
 
   my-python-packages = ps: with ps; [
     click
@@ -47,7 +51,7 @@ let
 
 
 in
-python.pkgs.buildPythonPackage {
+pkgs.python3.pkgs.buildPythonPackage {
   pname = "gramine";
   version = "1.6";
 
@@ -62,26 +66,29 @@ python.pkgs.buildPythonPackage {
   outputs = [ "out" "dev" ];
 
   # Unpack subproject sources
-  postUnpack = ''(
-    cd "$sourceRoot/subprojects"
-    tar -zxf ${gcc-wrap}
-    cp -av packagefiles/gcc-10.2.0/. gcc-10.2.0
-    tar -zxf ${tomlc99-wrap}
-    cp -av packagefiles/tomlc99/. tomlc99-208203af46bdbdb29ba199660ed78d09c220b6c5
-    tar -zxf ${cjson-wrap}
-    cp -av packagefiles/cJSON/. cJSON-1.7.12
-    tar -zxf ${curl-wrap}
-    cp -av packagefiles/curl-8.4.0/. curl-8.4.0
-    mkdir mbedtls-mbedtls-3.5.0
-    tar -zxf ${mbedtls-wrap} -C mbedtls-mbedtls-3.5.0
-    cp -av packagefiles/mbedtls/. mbedtls-mbedtls-3.5.0
-    tar -zxf ${uthash-wrap}
-    cp -av packagefiles/uthash/. uthash-2.1.0
-    mkdir glibc-2.38-1
-    tar -zxf ${glibc-wrap} -C glibc-2.38-1
-    cp -av packagefiles/glibc-2.38/. glibc-2.38-1
-    sed -i -e 's#set -e#set -ex#g' glibc-2.38-1/compile.sh
-  )'';
+  postUnpack = ''
+    (
+      cd "$sourceRoot/subprojects"
+      tar -zxf ${gcc-wrap}
+      cp -av packagefiles/gcc-10.2.0/. gcc-10.2.0
+      tar -zxf ${tomlc99-wrap}
+      cp -av packagefiles/tomlc99/. tomlc99-208203af46bdbdb29ba199660ed78d09c220b6c5
+      tar -zxf ${cjson-wrap}
+      cp -av packagefiles/cJSON/. cJSON-1.7.12
+      tar -zxf ${curl-wrap}
+      cp -av packagefiles/curl-8.4.0/. curl-8.4.0
+      mkdir mbedtls-mbedtls-3.5.0
+      tar -zxf ${mbedtls-wrap} -C mbedtls-mbedtls-3.5.0
+      cp -av packagefiles/mbedtls/. mbedtls-mbedtls-3.5.0
+      tar -zxf ${uthash-wrap}
+      cp -av packagefiles/uthash/. uthash-2.1.0
+      mkdir glibc-2.38-1
+      tar -zxf ${glibc-wrap} -C glibc-2.38-1
+      cp -av packagefiles/glibc-2.38/. glibc-2.38-1
+      sed -i -e 's#set -e#set -ex#g' glibc-2.38-1/compile.sh
+    )
+    sed -i -e 's#add_stylesheet#add_css_file#g' "$sourceRoot"/Documentation/conf.py
+  '';
 
   postPatch = ''
     patchShebangs --build $(find . -name '*.sh')
@@ -95,6 +102,15 @@ python.pkgs.buildPythonPackage {
     "-Dsgx=enabled"
     "-Dsgx_driver=upstream"
   ];
+
+  preBuild = ''
+    ( cd ..; make -C Documentation man )
+  '';
+
+  preInstall = ''
+    mkdir -p "$out/share/man"
+    cp -a ../Documentation/_build/man $out/share/man/man1
+  '';
 
   postFixup = ''
     set -e
@@ -111,7 +127,7 @@ python.pkgs.buildPythonPackage {
   format = "other";
 
   nativeBuildInputs = with pkgs; [
-    python
+    buildpython
     meson
     nasm
     ninja
@@ -120,6 +136,7 @@ python.pkgs.buildPythonPackage {
     nixsgx.sgx-sdk
     nixsgx.protobufc
     nixsgx.protobufc.dev
+    nixsgx.protobufc.lib
     nixsgx.libsgx-dcap-quote-verify.dev
     autoconf
     gawk
@@ -133,9 +150,8 @@ python.pkgs.buildPythonPackage {
   ];
 
   propagatedBuildInputs = [
-    (python.withPackages my-python-packages)
+    (pkgs.python3.withPackages my-python-packages)
   ];
-
 
   #doCheck = false;
 

@@ -2,6 +2,7 @@
 , lib
 , nixsgx
 , fetchurl
+, openssl_legacy
 , ...
 }:
 let
@@ -34,40 +35,32 @@ let
     hash = "sha256-FuUeBFXiiPAzgLQ25B1ZJ8YJRavYbQyYUrhL5X3W7V4=";
   };
 
-  #  python = 
-  #    let
-  #      overrideAttrs = self: super: {
-  #        openssl = super.pkgs.openssl_legacy;
-  #        openssl_legacy = super.pkgs.openssl_legacy;
-  #      };
-  #
-  #      packageOverrides = self: super: {
-  #        six = super.six.overridePythonAttrs (old: {
-  #          pytestFlagsArray = [
-  #            # uses ctypes to find native library
-  #            "--deselect=test_six.py::test_move_items"
-  #          ];
-  #        });
-  #        freezegun = super.freezegun.overridePythonAttrs (old: {
-  #          postUnpack = ''
-  #                 rm $sourceRoot/tests/test_sqlite3.py
-  #            	  '';
-  #          pytestFlagsArray = [
-  #            "--deselect=test_sqlite3.py"
-  #          ];
-  #        });
-  #        babel = super.babel.overridePythonAttrs (old: {
-  #          doCheck = false;
-  #          # nativeCheckInputs = old.nativeCheckInputs ++ [ (super.withPackages (ps: ps.tzdata) ) ];
-  #        });
-  #      };
-  #    in
-  #    (pkgs.python3Minimal.overrideAttrs (oldAttrs: rec { 
-  #        openssl = oldAttrs.pkgs.openssl_legacy;
-  #        openssl_legacy = oldAttrs.pkgs.openssl_legacy;
-  #})).override { inherit packageOverrides; inherit overrideAttrs; self = python; };
-
-  python = pkgs.python3;
+  mypython = 
+    let
+      packageOverrides = self: super: {
+        six = super.six.overridePythonAttrs (old: {
+          pytestFlagsArray = [
+            # uses ctypes to find native library
+            "--deselect=test_six.py::test_move_items"
+          ];
+        });
+        freezegun = super.freezegun.overridePythonAttrs (old: {
+          postUnpack = ''
+                 rm $sourceRoot/tests/test_sqlite3.py
+            	  '';
+          pytestFlagsArray = [
+            "--deselect=test_sqlite3.py"
+          ];
+        });
+        babel = super.babel.overridePythonAttrs (old: {
+          doCheck = false;
+          # nativeCheckInputs = old.nativeCheckInputs ++ [ (super.withPackages (ps: ps.tzdata) ) ];
+        });
+        openssl = true;
+        openssl_legacy = openssl_legacy;
+      };
+    in
+    pkgs.python3Minimal.override { inherit packageOverrides; self = mypython; };
 
   my-python-packages = ps: with ps; [
     click
@@ -80,7 +73,7 @@ let
 
 
 in
-python.pkgs.buildPythonPackage {
+mypython.pkgs.buildPythonPackage {
   pname = "gramine";
   version = "1.6";
 
@@ -146,7 +139,6 @@ python.pkgs.buildPythonPackage {
   #enableParallelBuilding = false;
 
   nativeBuildInputs = with pkgs; [
-    python
     meson
     nasm
     ninja
@@ -168,7 +160,7 @@ python.pkgs.buildPythonPackage {
   ];
 
   propagatedBuildInputs = [
-    (python.withPackages my-python-packages)
+    (mypython.withPackages my-python-packages)
   ];
 
   doCheck = false;
