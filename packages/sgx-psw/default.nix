@@ -14,7 +14,7 @@
 , debug ? false
 }:
 stdenv.mkDerivation rec {
-  inherit (nixsgx.sgx-sdk) version versionTag src;
+  inherit (nixsgx.sgx-sdk) version versionTag src patches;
   pname = "sgx-psw";
 
   postUnpack =
@@ -54,8 +54,11 @@ stdenv.mkDerivation rec {
     python3
     nixsgx.sgx-sdk
     which
-    protobuf
+  ];
+
+  buildInputs = [
     curl
+    protobuf
   ];
 
   hardeningDisable = [
@@ -89,7 +92,7 @@ stdenv.mkDerivation rec {
     installDir=$TMPDIR/install
     sgxPswDir=$installDir/opt/intel/sgxpsw
 
-    mv $installDir/usr/lib64 $out/lib
+    mv $installDir/usr/lib64/ $out/lib/
     ln -sr $out/lib $out/lib64
 
     # Install udev rules to lib/udev/rules.d

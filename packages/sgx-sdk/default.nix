@@ -46,6 +46,8 @@ stdenv.mkDerivation rec {
   '';
 
   patches = [
+    # no timestamp in mini zip archives
+    ../sgx-sdk/CppMicroServices-no-mtime.patch
     # Fix missing pthread_compat.h, see https://github.com/intel/linux-sgx/pull/784
     (fetchpatch {
       url = "https://github.com/intel/linux-sgx/commit/254b58f922a6bd49c308a4f47f05f525305bd760.patch";
