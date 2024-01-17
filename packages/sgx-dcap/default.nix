@@ -48,7 +48,11 @@ let
 
     outputs = [ "out" ];
 
-    patchPhase = ''
+    patches = [
+      ./SGXDataCenterAttestationPrimitives-tarball-repro.patch
+    ];
+
+    postPatch = ''
       patchShebangs --build $(find . -name '*.sh')
     '';
 
@@ -61,37 +65,37 @@ let
 
     # sigh... Intel!
     installPhase = ''
-              runHook preInstall
+      runHook preInstall
 
-      	# sigh... Intel!
-          	mkdir -p QuoteGeneration/pccs/lib/
-      	cp tools/PCKCertSelection/out/libPCKCertSelection.so QuoteGeneration/pccs/lib/
-      	mkdir $out
-      	for i in \
-      ./QuoteGeneration/installer/linux/common/libsgx-ae-id-enclave \
-      ./QuoteGeneration/installer/linux/common/libsgx-ae-qe3 \
-      ./QuoteGeneration/installer/linux/common/libsgx-ae-qve \
-      ./QuoteGeneration/installer/linux/common/libsgx-ae-tdqe \
-      ./QuoteGeneration/installer/linux/common/libsgx-dcap-default-qpl \
-      ./QuoteGeneration/installer/linux/common/libsgx-dcap-ql \
-      ./QuoteGeneration/installer/linux/common/libsgx-dcap-quote-verify \
-      ./QuoteGeneration/installer/linux/common/libsgx-pce-logic \
-      ./QuoteGeneration/installer/linux/common/libsgx-qe3-logic \
-      ./QuoteGeneration/installer/linux/common/libsgx-tdx-logic \
-      ./QuoteGeneration/installer/linux/common/libtdx-attest \
-      ./QuoteGeneration/installer/linux/common/sgx-dcap-pccs \
-      ./QuoteGeneration/installer/linux/common/tdx-qgs \
-      ./tools/PCKRetrievalTool/installer/common/sgx-pck-id-retrieval-tool \
-      ./tools/SGXPlatformRegistration/package/installer/common/libsgx-ra-network \
-      ./tools/SGXPlatformRegistration/package/installer/common/libsgx-ra-uefi \
-      ./tools/SGXPlatformRegistration/package/installer/common/sgx-ra-service \
+      # sigh... Intel!
+      mkdir -p QuoteGeneration/pccs/lib/
+      cp tools/PCKCertSelection/out/libPCKCertSelection.so QuoteGeneration/pccs/lib/
+
+      mkdir $out
+      for i in \
+          ./QuoteGeneration/installer/linux/common/libsgx-ae-id-enclave \
+          ./QuoteGeneration/installer/linux/common/libsgx-ae-qe3 \
+          ./QuoteGeneration/installer/linux/common/libsgx-ae-qve \
+          ./QuoteGeneration/installer/linux/common/libsgx-ae-tdqe \
+          ./QuoteGeneration/installer/linux/common/libsgx-dcap-default-qpl \
+          ./QuoteGeneration/installer/linux/common/libsgx-dcap-ql \
+          ./QuoteGeneration/installer/linux/common/libsgx-dcap-quote-verify \
+          ./QuoteGeneration/installer/linux/common/libsgx-pce-logic \
+          ./QuoteGeneration/installer/linux/common/libsgx-qe3-logic \
+          ./QuoteGeneration/installer/linux/common/libsgx-tdx-logic \
+          ./QuoteGeneration/installer/linux/common/libtdx-attest \
+          ./QuoteGeneration/installer/linux/common/sgx-dcap-pccs \
+          ./QuoteGeneration/installer/linux/common/tdx-qgs \
+          ./tools/PCKRetrievalTool/installer/common/sgx-pck-id-retrieval-tool \
+          ./tools/SGXPlatformRegistration/package/installer/common/libsgx-ra-network \
+          ./tools/SGXPlatformRegistration/package/installer/common/libsgx-ra-uefi \
+          ./tools/SGXPlatformRegistration/package/installer/common/sgx-ra-service \
       ; do
-              echo "Processing $i"
-      	"$i"/createTarball.sh
-      	cp -avr "$i" $out/
+          echo "Processing $i"
+          "$i"/createTarball.sh
+          cp -ivr "$i" $out/
       done
-
-              runHook postInstall
+      runHook postInstall
     '';
 
     nativeBuildInputs = [
@@ -108,7 +112,6 @@ let
     doCheck = false;
 
     dontDisableStatic = false;
-
 
     meta = with lib; {
       description = "Intel(R) Software Guard Extensions Data Center Attestation Primitives";
