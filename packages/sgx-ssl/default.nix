@@ -65,7 +65,7 @@ stdenv.mkDerivation {
   ];
 
   # Build the test app
-  doInstallCheck = false;
+  doInstallCheck = true;
   installCheckTarget = "test";
   installCheckFlags = [
     "SGX_MODE=SIM"
