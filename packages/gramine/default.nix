@@ -12,6 +12,7 @@
 , gawk
 , bison
 , patchelf
+, which
 , ...
 }:
 let
@@ -54,8 +55,6 @@ let
     tomli-w
     cryptography
   ];
-
-
 in
 python.pkgs.buildPythonPackage {
   pname = "gramine";
@@ -135,6 +134,7 @@ python.pkgs.buildPythonPackage {
     gawk
     bison
     patchelf
+    which
   ];
 
   buildInputs = [
