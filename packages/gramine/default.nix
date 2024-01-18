@@ -2,6 +2,16 @@
 , lib
 , nixsgx
 , fetchurl
+, bash
+, meson
+, nasm
+, ninja
+, cmake
+, pkg-config
+, autoconf
+, gawk
+, bison
+, patchelf
 , ...
 }:
 let
@@ -110,7 +120,7 @@ python.pkgs.buildPythonPackage {
 
   format = "other";
 
-  nativeBuildInputs = with pkgs; [
+  nativeBuildInputs = [
     python
     meson
     nasm
