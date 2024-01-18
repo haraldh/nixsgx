@@ -47,7 +47,9 @@ stdenv.mkDerivation rec {
 
   patches = [
     # no timestamp in mini zip archives
-    ../sgx-sdk/CppMicroServices-no-mtime.patch
+    ./CppMicroServices-no-mtime.patch
+    # Set the CXX standard for nix builds of sgx-psw
+    ./aesm-cxx-standard.patch
     # Fix missing pthread_compat.h, see https://github.com/intel/linux-sgx/pull/784
     (fetchpatch {
       url = "https://github.com/intel/linux-sgx/commit/254b58f922a6bd49c308a4f47f05f525305bd760.patch";
@@ -83,7 +85,7 @@ stdenv.mkDerivation rec {
     pushd external/cbor
       cp -r libcbor sgx_libcbor
     popd
-    
+
     pushd external/cbor/libcbor
       git apply ../raw_cbor.patch >/dev/null 2>&1 \
         || git apply ../raw_cbor.patch --check -R

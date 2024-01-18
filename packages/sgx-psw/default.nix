@@ -44,7 +44,6 @@ stdenv.mkDerivation rec {
 
       tar -zxf ${ae.prebuilt}   -C $sourceRoot/
       tar -zxf ${dcap.prebuilt} -C $sourceRoot/external/dcap_source/QuoteGeneration/
-      sed -i -e 's#^set(CMAKE_CXX_STANDARD 11)#set(CMAKE_CXX_STANDARD 17)#g' $sourceRoot/psw/ae/aesm_service/source/CMakeLists.txt
     '';
 
   nativeBuildInputs = [
