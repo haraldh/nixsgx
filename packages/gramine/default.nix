@@ -130,12 +130,12 @@ python.pkgs.buildPythonPackage {
   buildInputs = [
     nixsgx.protobufc.dev
     nixsgx.protobufc.lib
+    bash
   ];
 
   propagatedBuildInputs = [
     (python.withPackages my-python-packages)
   ];
-
 
   #doCheck = false;
 
