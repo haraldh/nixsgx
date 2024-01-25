@@ -13,7 +13,7 @@ pkgs.dockerTools.buildLayeredImage ({
       pkgs.busybox
       nixsgx.sgx-psw
       nixsgx.gramine
-      nixsgx.libsgx-dcap-default-qpl
+      nixsgx.sgx-dcap.default_qpl
       nixsgx.restart-aesmd
     ];
     pathsToLink = [ "/bin" "/lib" "/etc" ];

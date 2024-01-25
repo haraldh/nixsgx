@@ -16,7 +16,7 @@ dockerTools.buildImage
     azure-dcap-client
     sgx-psw
     gramine
-    libsgx-dcap-quote-verify
+    nixsgx.sgx-dcap.quote_verify
   ];
 
 }

@@ -129,7 +129,8 @@ python.pkgs.buildPythonPackage {
     nixsgx.sgx-sdk
     nixsgx.protobufc
     nixsgx.protobufc.dev
-    nixsgx.libsgx-dcap-quote-verify.dev
+    nixsgx.sgx-dcap.dev
+    nixsgx.sgx-dcap.quote_verify
     autoconf
     gawk
     bison
