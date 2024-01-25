@@ -1,16 +1,18 @@
-{ pkgs
-, lib
+{ lib
+, buildEnv
+, dockerTools
 , nixsgx
+, busybox
 , ...
 }:
-pkgs.dockerTools.buildLayeredImage ({
+dockerTools.buildLayeredImage {
   name = "gramine-dcap";
   tag = "latest";
 
-  contents = pkgs.buildEnv ({
+  contents = buildEnv {
     name = "image-root";
     paths = [
-      pkgs.busybox
+      busybox
       nixsgx.sgx-psw
       nixsgx.gramine
       nixsgx.sgx-dcap.default_qpl
@@ -21,5 +23,5 @@ pkgs.dockerTools.buildLayeredImage ({
       	mkdir -p $out/var
       	ln -s /run $out/var/run
     '';
-  });
-})
+  };
+}

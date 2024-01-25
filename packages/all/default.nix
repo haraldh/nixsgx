@@ -1,22 +1,38 @@
 { lib
+, buildEnv
+, stdenv
 , symlinkJoin
 , nixsgx
 }:
-symlinkJoin
-{
-  name = "all";
+let
+  container = stdenv.mkDerivation {
+    name = "container";
 
-  paths = with nixsgx; [
+    src = with nixsgx; [
+      docker-gramine-azure
+      docker-gramine-dcap
+    ];
+
+    unpackPhase = "true";
+
+    installPhase = ''
+      set -x
+      mkdir -p $out
+      cp -vr $src $out
+    '';
+  };
+in
+symlinkJoin {
+  name = "all";
+  paths = with nixsgx;[
+    container
     azure-dcap-client
     gramine
+    protobufc
+    restart-aesmd
     sgx-dcap
     sgx-psw
     sgx-sdk
     sgx-ssl
-    # docker-gramine-azure
-    # docker-gramine-dcap
-    restart-aesmd
-    protobufc
   ];
-
 }
