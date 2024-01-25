@@ -1,6 +1,7 @@
 { pkgs
 , lib
 , nixsgx
+, sgx-sdk
 , fetchurl
 , bash
 , meson
@@ -126,7 +127,7 @@ python.pkgs.buildPythonPackage {
     ninja
     cmake
     pkg-config
-    nixsgx.sgx-sdk
+    sgx-sdk
     nixsgx.protobufc
     nixsgx.protobufc.dev
     nixsgx.libsgx-dcap-quote-verify.dev

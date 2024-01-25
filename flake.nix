@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:haraldh/nixpkgs/update_sgx";
 
     snowfall-lib = {
       url = "github:snowfallorg/lib";

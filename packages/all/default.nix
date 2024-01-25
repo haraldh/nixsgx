@@ -7,7 +7,6 @@ symlinkJoin
   name = "all";
 
   paths = with nixsgx; [
-    azure-dcap-client
     gramine
     libsgx-ae-id-enclave
     libsgx-ae-qe3
@@ -25,10 +24,7 @@ symlinkJoin
     sgx-dcap
     #    sgx-dcap-pccs
     #    sgx-pck-id-retrieval-tool
-    sgx-psw
     #    sgx-ra-service
-    sgx-sdk
-    sgx-ssl
     #    tdx-qgs
   ];
 

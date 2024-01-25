@@ -1,0 +1,12 @@
+diff --git a/QuoteVerification/QVL/Src/AttestationCommons/include/OpensslHelpers/OpensslTypes.h b/QuoteVerification/QVL/Src/AttestationCommons/include/OpensslHelpers/OpensslTypes.h
+index d158efa..39a7678 100644
+--- a/QuoteVerification/QVL/Src/AttestationCommons/include/OpensslHelpers/OpensslTypes.h
++++ b/QuoteVerification/QVL/Src/AttestationCommons/include/OpensslHelpers/OpensslTypes.h
+@@ -32,6 +32,7 @@
+ #ifndef SGX_DCAP_COMMONS_OPENSSL_TYPES_H_
+ #define SGX_DCAP_COMMONS_OPENSSL_TYPES_H_
+ 
++#include <cstdio>
+ #include <tuple>
+ #include <memory>
+ #include <openssl/asn1.h>
