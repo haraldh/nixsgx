@@ -10,7 +10,7 @@
 }:
 let
   sgxVersion = nixsgx.sgx-sdk.versionTag;
-  opensslVersion = "3.0.10";
+  opensslVersion = "3.0.12";
 in
 stdenv.mkDerivation {
   pname = "sgx-ssl" + lib.optionalString debug "-debug";
@@ -19,7 +19,6 @@ stdenv.mkDerivation {
   src = fetchFromGitHub {
     owner = "intel";
     repo = "intel-sgx-ssl";
-    #rev = "lin_${sgxVersion}_${opensslVersion}";
     rev = "3.0_Rev2";
     hash = "sha256-dmLyaG6v+skjSa0KxLAfIfSBOxp9grrI7ds6WdGPe0I=";
   };
@@ -28,7 +27,7 @@ stdenv.mkDerivation {
     let
       opensslSourceArchive = fetchurl {
         url = "https://www.openssl.org/source/openssl-${opensslVersion}.tar.gz";
-        hash = "sha256-F2HU9bE6ECi5tvPUuOF/6wztyTcPav5h1xk9LNzoMyM=";
+        hash = "sha256-+Tyejt3l6RZhGd4xdV/Ie0qjSGNmL2fd/LoU0La2m2E=";
       };
     in
     ''
@@ -44,10 +43,7 @@ stdenv.mkDerivation {
                 'bash -c "true"'
   '';
 
-  enableParallelBuilding = true;
-
   nativeBuildInputs = [
-    openssl
     perl
     nixsgx.sgx-sdk
     stdenv.cc.libc
@@ -78,8 +74,8 @@ stdenv.mkDerivation {
   meta = with lib; {
     description = "Cryptographic library for Intel SGX enclave applications based on OpenSSL";
     homepage = "https://github.com/intel/intel-sgx-ssl";
-    maintainers = with maintainers; [ trundle veehaitch ];
+    maintainers = with maintainers; [ phlip9 trundle veehaitch ];
     platforms = [ "x86_64-linux" ];
-    license = with licenses; [ bsd3 openssl ];
+    license = [ licenses.bsd3 licenses.openssl ];
   };
 }

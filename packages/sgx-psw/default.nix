@@ -29,11 +29,11 @@ stdenv.mkDerivation rec {
       # Also include the Data Center Attestation Primitives (DCAP) platform
       # enclaves.
       dcap = rec {
-        version = "1.19";
+        version = "1.20";
         filename = "prebuilt_dcap_${version}.tar.gz";
         prebuilt = fetchurl {
           url = "https://download.01.org/intel-sgx/sgx-dcap/${version}/linux/${filename}";
-          hash = "sha256-u7MfN2+vLD8e/i6KznNdvPzHJmZ8DwSXHGOeaIe3YWg=";
+          hash = "sha256-nPsI89KSBA3cSNTMWyktZP5dkf+BwL3NZ4MuUf6G98o=";
         };
       };
     in
@@ -181,7 +181,7 @@ stdenv.mkDerivation rec {
   meta = with lib; {
     description = "Intel SGX Architectural Enclave Service Manager";
     homepage = "https://github.com/intel/linux-sgx";
-    maintainers = with maintainers; [ veehaitch citadelcore ];
+    maintainers = with maintainers; [ phlip9 veehaitch citadelcore ];
     platforms = [ "x86_64-linux" ];
     license = with licenses; [ bsd3 ];
   };
