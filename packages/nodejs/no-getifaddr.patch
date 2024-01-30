@@ -1,0 +1,13 @@
+diff --git a/src/unix/linux.c b/src/unix/linux.c
+index 48b9c2c4..e3356f98 100644
+--- a/src/unix/linux.c
++++ b/src/unix/linux.c
+@@ -114,7 +114,7 @@
+ # endif
+ #endif /* __NR_getrandom */
+
+-#define HAVE_IFADDRS_H 1
++#define HAVE_IFADDRS_H 0
+
+ # if defined(__ANDROID_API__) && __ANDROID_API__ < 24
+ # undef HAVE_IFADDRS_H

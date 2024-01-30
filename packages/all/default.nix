@@ -25,9 +25,10 @@ in
 symlinkJoin {
   name = "all";
   paths = with nixsgx;[
-    container
     azure-dcap-client
+    container
     gramine
+    nodejs
     protobufc
     restart-aesmd
     sgx-dcap
