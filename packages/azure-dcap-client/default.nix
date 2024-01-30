@@ -34,16 +34,19 @@ let
 in
 stdenv.mkDerivation rec {
   pname = "azure-dcap-client";
-  version = "1.12.1";
+  version = "1.12.3";
 
   src = fetchFromGitHub {
     owner = "microsoft";
     repo = pname;
     rev = version;
-    hash = "sha256-q0dI4WdA1ue4sw+QfSherh31Ldf9gnhoft66o3E9gnU=";
+    hash = "sha256-zTDaICsSPXctgFRCZBiZwXV9dLk2pFL9kp5a8FkiTZA=";
   };
 
-  outputs = [ "out" "dev" ];
+  patches = [
+    ./missing-includes.patch
+    ./Azure-DCAP-Client.patch
+  ];
 
   nativeBuildInputs = [
     pkg-config
@@ -53,10 +56,6 @@ stdenv.mkDerivation rec {
     curl
     nlohmann_json
     openssl
-  ];
-
-  patches = [
-    ./Azure-DCAP-Client.patch # workaround for out-of-date TCB data
   ];
 
   postPatch = ''
@@ -82,7 +81,7 @@ stdenv.mkDerivation rec {
   meta = with lib; {
     description = "Interfaces between SGX SDKs and the Azure Attestation SGX Certification Cache";
     homepage = "https://github.com/microsoft/azure-dcap-client";
-    maintainers = with maintainers; [ trundle veehaitch ];
+    maintainers = with maintainers; [ phlip9 trundle veehaitch ];
     platforms = [ "x86_64-linux" ];
     license = [ licenses.mit ];
   };
