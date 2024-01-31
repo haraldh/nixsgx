@@ -28,6 +28,7 @@ symlinkJoin {
     azure-dcap-client
     container
     gramine
+    libuv
     nodejs
     protobufc
     restart-aesmd

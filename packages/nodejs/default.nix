@@ -1,19 +1,12 @@
 { lib
 , callPackage
 , nodejs_18
-, libuv
-, pkgs
+, nixsgx
 , enableNpm ? false
 }:
 
 let
-  libuv_patched = libuv.overrideAttrs (prevAttrs: {
-    patches = (prevAttrs.patches or [ ]) ++ [
-      ./no-getifaddr.patch
-      ./no-eventfd.patch
-    ];
-  });
-  callPackage' = p: args: callPackage p (args // { libuv = libuv_patched; });
+  callPackage' = p: args: callPackage p (args // { libuv = nixsgx.libuv; });
   nodejs_libuv = nodejs_18.override { callPackage = callPackage'; };
   nodejs_patched = nodejs_libuv.overrideAttrs (prevAttrs: {
     inherit enableNpm;
