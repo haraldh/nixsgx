@@ -1,4 +1,4 @@
-{ callPackage, lib, overrideCC, pkgs, buildPackages, fetchpatch, openssl, python3, nixsgx, enableNpm ? false }:
+{ callPackage, lib, overrideCC, pkgs, buildPackages, fetchpatch, openssl, python3, enableNpm ? true }:
 
 let
   # Clang 16+ cannot build Node v18 due to -Wenum-constexpr-conversion errors.
@@ -16,7 +16,6 @@ let
     stdenv = ensureCompatibleCC pkgs;
     buildPackages = buildPackages // { stdenv = ensureCompatibleCC buildPackages; };
     python = python3;
-    libuv = nixsgx.libuv;
   };
 in
 buildNodejs {
