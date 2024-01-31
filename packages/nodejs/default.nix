@@ -8,7 +8,10 @@
 
 let
   libuv_patched = libuv.overrideAttrs (prevAttrs: {
-    patches = (prevAttrs.patches or [ ]) ++ [ ./no-getifaddr.patch ];
+    patches = (prevAttrs.patches or [ ]) ++ [
+      ./no-getifaddr.patch
+      ./no-eventfd.patch
+    ];
   });
   callPackage' = p: args: callPackage p (args // { libuv = libuv_patched; });
   nodejs_libuv = nodejs_18.override { callPackage = callPackage'; };
