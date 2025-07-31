@@ -10,7 +10,7 @@ All package builds should be reproducible and therefore can be used to build rep
 
 ### Test enclave
 
-A testing enclave container is provided and can be ran like so:
+A testing enclave container is provided and can be run like so:
 
 ```sh
 # Build the dcap (or azure) container variant
@@ -32,5 +32,6 @@ docker run -i --init --rm \
 
 The following projects provide reproducible enclaves using nixsgx:
 
+- https://github.com/haraldh/teepot
 - https://github.com/matter-labs/teepot
 - https://github.com/matter-labs/era-fee-withdrawer/tree/gramine-sgx
