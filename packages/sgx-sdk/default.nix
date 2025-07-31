@@ -146,13 +146,21 @@ stdenv.mkDerivation rec {
       popd
     '';
 
-  env.NIX_CFLAGS_COMPILE = "-Wno-error=missing-include-dirs";
+  env.NIX_CFLAGS_COMPILE = "-Wno-error=missing-include-dirs -Wno-error=implicit-fallthrough -Wno-error=implicit-int -Wno-error=declaration-missing-parameter-type";
 
   buildFlags = [
     "sdk_install_pkg"
+    "COMMON_FLAGS+=-Wno-error=missing-include-dirs"
+    "COMMON_FLAGS+=-Wno-error=implicit-fallthrough"
+    "COMMON_FLAGS+=-Wno-error=implicit-int"
+    "COMMON_FLAGS+=-Wno-error=declaration-missing-parameter-type"
+    "V=1"
   ] ++ lib.optionals debug [
     "DEBUG=1"
   ];
+
+  # sigh! Intel
+  enableParallelBuilding = false;
 
   postBuild = ''
     patchShebangs linux/installer/bin/sgx_linux_x64_sdk_${version}.bin
