@@ -15,7 +15,7 @@
 }:
 stdenv.mkDerivation rec {
   pname = "sgx-dcap";
-  version = "1.22";
+  version = "1.25";
 
   postUnpack =
     let
@@ -23,7 +23,7 @@ stdenv.mkDerivation rec {
         filename = "prebuilt_dcap_${version}.tar.gz";
         prebuilt = fetchurl {
           url = "https://download.01.org/intel-sgx/sgx-dcap/${version}/linux/${filename}";
-          hash = "sha256-RTpJQ6epoAN8YQXSJUjJQ5mPaQIiQpStTWFsnspjjDQ=";
+          hash = "sha256-TXQ8xh0q9RKPyKqjMvxoQtIH2lxbhCiwpV+HvQxACaw=";
         };
       };
     in
@@ -38,9 +38,9 @@ stdenv.mkDerivation rec {
 
   src = fetchFromGitHub {
     owner = "intel";
-    repo = "SGXDataCenterAttestationPrimitives";
+    repo = "confidential-computing.tee.dcap";
     rev = "DCAP_${version}";
-    hash = "sha256-Ubjm3/tpfkRrKhub10g2oDl+2vv/MF4wnJR/nLz7KDk=";
+    hash = "sha256-EXfQ1nOt8IP09N4yKUeQmlbAbr/4FXoToAnBNcQb2dM=";
     fetchSubmodules = true;
   };
 
@@ -64,8 +64,6 @@ stdenv.mkDerivation rec {
   ];
 
   patches = [
-    # make tarballs reproducible
-    ./SGXDataCenterAttestationPrimitives-tarball-repro.patch
     # sigh... Intel!
     ./SGXDataCenterAttestationPrimitives-parallel-make.patch
     # make config work without a dedicated PCCS server by default
@@ -74,6 +72,21 @@ stdenv.mkDerivation rec {
 
   postPatch = ''
     patchShebangs --build $(find . -name '*.sh')
+
+    # Make tarballs reproducible (replaces the old tarball-repro.patch which
+    # broke across versions due to path changes)
+    find . -name createTarball.sh -exec sed -i \
+      "s|tar -zcvf \''${TARBALL_NAME} \*|tar -zcv --sort=name --owner=root:0 --group=root:0 --mtime='UTC 2019-01-01 00:00:00' -f \''${TARBALL_NAME} *|" \
+      {} +
+
+    # Skip qve-logic-tests — they have linker errors and we don't need them
+    sed -i 's/all: qve-logic-tests/all:/' ae/QvE/Makefile
+
+    # Fix Boost 1.87+ compatibility (io_service was removed, use io_context)
+    sed -i 's/io_service/io_context/g' \
+      QuoteGeneration/quote_wrapper/qgs/qgs_server.h \
+      QuoteGeneration/quote_wrapper/qgs/qgs_server.cpp \
+      QuoteGeneration/quote_wrapper/qgs/server_main.cpp
   '';
 
   makeFlags = [
@@ -81,7 +94,17 @@ stdenv.mkDerivation rec {
     "SGXSSL_PACKAGE_PATH=${nixsgx.sgx-ssl}"
   ];
 
-  enableParallelBuilding = true;
+  env.CMAKE_POLICY_VERSION_MINIMUM = "3.5";
+
+  buildFlags = [
+    "QuoteGeneration"
+    "QuoteVerification"
+    "PCKCertSelection"
+    "PCKRetrievalTool"
+    "SGXPlatformRegistration"
+  ];
+
+  enableParallelBuilding = false;
   dontUseCmakeConfigure = true;
 
   # setOutputFlags = false;
@@ -110,8 +133,8 @@ stdenv.mkDerivation rec {
         ./QuoteGeneration/installer/linux/common/libsgx-qe3-logic
         ./QuoteGeneration/installer/linux/common/libsgx-tdx-logic
         ./QuoteGeneration/installer/linux/common/libtdx-attest
-        ./tools/SGXPlatformRegistration/package/installer/common/libsgx-ra-network
-        ./tools/SGXPlatformRegistration/package/installer/common/libsgx-ra-uefi
+        ./tools/SGXPlatformRegistration/installer/common/libsgx-ra-network
+        ./tools/SGXPlatformRegistration/installer/common/libsgx-ra-uefi
         ./tools/PCKRetrievalTool/installer/common/sgx-pck-id-retrieval-tool
     )
 
@@ -146,9 +169,9 @@ stdenv.mkDerivation rec {
         "$tdx_logic"
         QuoteGeneration/installer/linux/common/libtdx-attest/output/libtdx-attest
         "$libtdx_attest"
-        tools/SGXPlatformRegistration/package/installer/common/libsgx-ra-network/output/libsgx-ra-network
+        tools/SGXPlatformRegistration/installer/common/libsgx-ra-network/output/libsgx-ra-network
         "$ra_network"
-        tools/SGXPlatformRegistration/package/installer/common/libsgx-ra-uefi/output/libsgx-ra-uefi
+        tools/SGXPlatformRegistration/installer/common/libsgx-ra-uefi/output/libsgx-ra-uefi
         "$ra_uefi"
         tools/PCKRetrievalTool/installer/common/sgx-pck-id-retrieval-tool/output
         "$pck_id_retrieval_tool"
@@ -237,7 +260,7 @@ stdenv.mkDerivation rec {
 
   meta = with lib; {
     description = "Intel(R) Software Guard Extensions Data Center Attestation Primitives";
-    homepage = "https://github.com/intel/SGXDataCenterAttestationPrimitives";
+    homepage = "https://github.com/intel/confidential-computing.tee.dcap";
     platforms = [ "x86_64-linux" ];
     license = with licenses; [ bsd3 ];
   };

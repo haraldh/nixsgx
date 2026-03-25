@@ -32,11 +32,11 @@ stdenv.mkDerivation rec {
       # Also include the Data Center Attestation Primitives (DCAP) platform
       # enclaves.
       dcap = rec {
-        version = "1.22";
+        version = "1.25";
         filename = "prebuilt_dcap_${version}.tar.gz";
         prebuilt = fetchurl {
           url = "https://download.01.org/intel-sgx/sgx-dcap/${version}/linux/${filename}";
-          hash = "sha256-RTpJQ6epoAN8YQXSJUjJQ5mPaQIiQpStTWFsnspjjDQ=";
+          hash = "sha256-TXQ8xh0q9RKPyKqjMvxoQtIH2lxbhCiwpV+HvQxACaw=";
         };
       };
     in
@@ -63,6 +63,8 @@ stdenv.mkDerivation rec {
     curl
     protobuf
   ];
+
+  env.CMAKE_POLICY_VERSION_MINIMUM = "3.5";
 
   hardeningDisable = [
     # causes redefinition of _FORTIFY_SOURCE
@@ -184,7 +186,7 @@ stdenv.mkDerivation rec {
 
   meta = {
     description = "Intel SGX Architectural Enclave Service Manager";
-    homepage = "https://github.com/intel/linux-sgx";
+    homepage = "https://github.com/intel/confidential-computing.sgx";
     maintainers = with lib.maintainers; [ phlip9 veehaitch citadelcore ];
     platforms = [ "x86_64-linux" ];
     license = [ lib.licenses.bsd3 ];
