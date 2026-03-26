@@ -23,7 +23,7 @@ jobs:
       - name: Enable magic Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@main
 
-      - run: nix fmt . -- --check
+      - run: nix fmt . -- --ci
 
   build:
     runs-on: ubuntu-latest
