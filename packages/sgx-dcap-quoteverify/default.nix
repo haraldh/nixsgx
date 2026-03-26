@@ -220,14 +220,12 @@ stdenv.mkDerivation {
     $CXX $CXXFLAGS_COMMON $QVL_VERIFY_INC -c $QG_DIR/qpl/sgx_base64.cpp -o $TMPDIR/qv/sgx_base64.o
     $CXX $CXXFLAGS_COMMON $QVL_VERIFY_INC -c $QV_DIR/appraisal/common/ec_key.cpp -o $TMPDIR/qv/ec_key.o
     VERIFY_OBJS="$VERIFY_OBJS $TMPDIR/qv/sgx_base64.o $TMPDIR/qv/ec_key.o"
-  ''
-  + lib.optionalString stdenv.isDarwin ''
+
+
     # QAL stub — tee_qae_get_target_info is in the QAL which we don't build.
-    # On Linux unresolved symbols in .so are allowed; on macOS they are not.
     $CXX $CXXFLAGS_COMMON $QVL_VERIFY_INC -c ${./qal_stub.cpp} -o $TMPDIR/qv/qal_stub.o
     VERIFY_OBJS="$VERIFY_OBJS $TMPDIR/qv/qal_stub.o"
-  ''
-  + ''
+
 
     # Link everything
   ''
