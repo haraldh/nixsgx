@@ -212,7 +212,7 @@ stdenv.mkDerivation {
     VERIFY_OBJS="$VERIFY_OBJS $TMPDIR/qv/se_trace.o $TMPDIR/qv/se_thread.o $TMPDIR/qv/qve_u.o"
 
     # QvE untrusted wrapper objects
-    $CXX $CXXFLAGS_COMMON $QVL_VERIFY_INC -c $QVE_SRC/qve/qve.cpp -o $TMPDIR/qv/untrusted_qve.o
+    $CXX $CXXFLAGS_COMMON $QVL_VERIFY_INC -Wno-tautological-constant-out-of-range-compare -c $QVE_SRC/qve/qve.cpp -o $TMPDIR/qv/untrusted_qve.o
     $CXX $CXXFLAGS_COMMON $QVL_VERIFY_INC -c $QVE_SRC/qve/qve_logic.cpp -o $TMPDIR/qv/untrusted_qve_logic.o
     VERIFY_OBJS="$VERIFY_OBJS $TMPDIR/qv/untrusted_qve.o $TMPDIR/qv/untrusted_qve_logic.o"
 
