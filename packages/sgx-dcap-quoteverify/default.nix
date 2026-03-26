@@ -239,7 +239,7 @@ stdenv.mkDerivation {
           -L$SGXSSL_PACKAGE_PATH/lib64 -lsgx_usgxssl \
           -L$TMPDIR -lsgx_dcap_qvl_parser -lsgx_dcap_qvl_attestation \
           -L$PREBUILD_OPENSSL/lib/linux64 -lcrypto \
-          -dynamiclib -Wl,-install_name,libsgx_dcap_quoteverify.$SGX_MAJOR_VER.dylib \
+          -dynamiclib -Wl,-install_name,$out/lib/libsgx_dcap_quoteverify.$SGX_MAJOR_VER.dylib \
           -Wl,-exported_symbols_list,${./sgx_dcap_quoteverify.exported} \
           -Wl,-dead_strip \
           -pthread \
