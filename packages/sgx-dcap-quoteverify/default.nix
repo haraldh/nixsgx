@@ -35,6 +35,28 @@ stdenv.mkDerivation {
 
   postPatch = ''
     patchShebangs --build $(find . -name '*.sh')
+  ''
+  + lib.optionalString stdenv.isDarwin ''
+    # se_thread.c: replace Linux syscall(__NR_gettid) with pthread_threadid_np
+    substituteInPlace QuoteGeneration/common/src/se_thread.c \
+      --replace-fail \
+        'unsigned int se_get_threadid(void) { return (unsigned)syscall(__NR_gettid);}' \
+        '#ifdef __APPLE__
+    #include <pthread.h>
+    unsigned int se_get_threadid(void) { uint64_t tid; pthread_threadid_np(NULL, &tid); return (unsigned)tid; }
+    #else
+    unsigned int se_get_threadid(void) { return (unsigned)syscall(__NR_gettid); }
+    #endif'
+
+    # qve_parser.cpp: guard /proc/self/exe with __linux__
+    substituteInPlace QuoteVerification/dcap_quoteverify/linux/qve_parser.cpp \
+      --replace-fail \
+        'ssize_t i = readlink( "/proc/self/exe", p_file_path, buf_size - 1);' \
+        '#ifdef __linux__
+            ssize_t i = readlink( "/proc/self/exe", p_file_path, buf_size - 1);
+    #else
+            ssize_t i = -1;
+    #endif'
   '';
 
   buildPhase = ''
@@ -63,7 +85,9 @@ stdenv.mkDerivation {
     mkdir -p $PREBUILD_OPENSSL/inc $PREBUILD_OPENSSL/lib/linux64
     ln -s $OPENSSL_INC/openssl $PREBUILD_OPENSSL/inc/openssl
     ln -s $OPENSSL_LIB/libcrypto.a $PREBUILD_OPENSSL/lib/linux64/libcrypto.a \
-      || ln -s $OPENSSL_LIB/libcrypto.so $PREBUILD_OPENSSL/lib/linux64/libcrypto.so
+      || ln -s $OPENSSL_LIB/libcrypto${
+        if stdenv.isDarwin then ".dylib" else ".so"
+      } $PREBUILD_OPENSSL/lib/linux64/libcrypto${if stdenv.isDarwin then ".dylib" else ".so"}
 
     # --- Copy pre-generated edger8r files ---
     cp ${./qve_u.c} QuoteVerification/dcap_quoteverify/linux/qve_u.c
@@ -78,7 +102,18 @@ stdenv.mkDerivation {
     COMMON_FLAGS="-O2 -ffunction-sections -fdata-sections -fstack-protector-strong"
     COMMON_FLAGS="$COMMON_FLAGS -D_GLIBCXX_ASSERTIONS -DNDEBUG"
     COMMON_FLAGS="$COMMON_FLAGS -Wall -Wextra -fPIC -USGX_TRUSTED"
-    COMMON_LDFLAGS="-Wl,-z,relro,-z,now,-z,noexecstack"
+  ''
+  + (
+    if stdenv.isDarwin then
+      ''
+        COMMON_LDFLAGS=""
+      ''
+    else
+      ''
+        COMMON_LDFLAGS="-Wl,-z,relro,-z,now,-z,noexecstack"
+      ''
+  )
+  + ''
 
     # Include paths
     QG_DIR=$DCAP_SRC/QuoteGeneration
@@ -116,7 +151,18 @@ stdenv.mkDerivation {
       -I$QV_DIR/appraisal/common \
       -I$QV_DIR/appraisal/qal"
 
-    CFLAGS_COMMON="$COMMON_FLAGS -Wjump-misses-init -Wstrict-prototypes -Wunsuffixed-float-constants"
+  ''
+  + (
+    if stdenv.isDarwin then
+      ''
+        CFLAGS_COMMON="$COMMON_FLAGS"
+      ''
+    else
+      ''
+        CFLAGS_COMMON="$COMMON_FLAGS -Wjump-misses-init -Wstrict-prototypes -Wunsuffixed-float-constants"
+      ''
+  )
+  + ''
     CXXFLAGS_COMMON="$COMMON_FLAGS -Wnon-virtual-dtor -std=c++17"
 
     # --- Build QVL Attestation Library (untrusted) ---
@@ -174,19 +220,47 @@ stdenv.mkDerivation {
     $CXX $CXXFLAGS_COMMON $QVL_VERIFY_INC -c $QG_DIR/qpl/sgx_base64.cpp -o $TMPDIR/qv/sgx_base64.o
     $CXX $CXXFLAGS_COMMON $QVL_VERIFY_INC -c $QV_DIR/appraisal/common/ec_key.cpp -o $TMPDIR/qv/ec_key.o
     VERIFY_OBJS="$VERIFY_OBJS $TMPDIR/qv/sgx_base64.o $TMPDIR/qv/ec_key.o"
+  ''
+  + lib.optionalString stdenv.isDarwin ''
+    # QAL stub — tee_qae_get_target_info is in the QAL which we don't build.
+    # On Linux unresolved symbols in .so are allowed; on macOS they are not.
+    $CXX $CXXFLAGS_COMMON $QVL_VERIFY_INC -c ${./qal_stub.cpp} -o $TMPDIR/qv/qal_stub.o
+    VERIFY_OBJS="$VERIFY_OBJS $TMPDIR/qv/qal_stub.o"
+  ''
+  + ''
 
     # Link everything
-    $CXX $CXXFLAGS_COMMON \
-      $VERIFY_OBJS \
-      -L$SGXSSL_PACKAGE_PATH/lib64 -lsgx_usgxssl \
-      -L$TMPDIR -lsgx_dcap_qvl_parser -lsgx_dcap_qvl_attestation \
-      -L$PREBUILD_OPENSSL/lib/linux64 -lcrypto \
-      -shared -Wl,-soname=libsgx_dcap_quoteverify.so.$SGX_MAJOR_VER \
-      -Wl,--version-script=$QV_LINUX/sgx_dcap_quoteverify.lds \
-      -Wl,--gc-sections \
-      $COMMON_LDFLAGS \
-      -pthread -ldl \
-      -o $TMPDIR/libsgx_dcap_quoteverify.so
+  ''
+  + (
+    if stdenv.isDarwin then
+      ''
+        $CXX $CXXFLAGS_COMMON \
+          $VERIFY_OBJS \
+          -L$SGXSSL_PACKAGE_PATH/lib64 -lsgx_usgxssl \
+          -L$TMPDIR -lsgx_dcap_qvl_parser -lsgx_dcap_qvl_attestation \
+          -L$PREBUILD_OPENSSL/lib/linux64 -lcrypto \
+          -dynamiclib -Wl,-install_name,libsgx_dcap_quoteverify.$SGX_MAJOR_VER.dylib \
+          -Wl,-exported_symbols_list,${./sgx_dcap_quoteverify.exported} \
+          -Wl,-dead_strip \
+          -pthread \
+          -o $TMPDIR/libsgx_dcap_quoteverify.dylib
+      ''
+    else
+      ''
+        $CXX $CXXFLAGS_COMMON \
+          $VERIFY_OBJS \
+          -L$SGXSSL_PACKAGE_PATH/lib64 -lsgx_usgxssl \
+          -L$TMPDIR -lsgx_dcap_qvl_parser -lsgx_dcap_qvl_attestation \
+          -L$PREBUILD_OPENSSL/lib/linux64 -lcrypto \
+          -shared -Wl,-soname=libsgx_dcap_quoteverify.so.$SGX_MAJOR_VER \
+          -Wl,--version-script=$QV_LINUX/sgx_dcap_quoteverify.lds \
+          -Wl,--gc-sections \
+          $COMMON_LDFLAGS \
+          -pthread -ldl \
+          -o $TMPDIR/libsgx_dcap_quoteverify.so
+      ''
+  )
+  + ''
 
     runHook postBuild
   '';
@@ -200,9 +274,22 @@ stdenv.mkDerivation {
 
     mkdir -p $out/lib $out/include
 
-    cp $TMPDIR/libsgx_dcap_quoteverify.so $out/lib/libsgx_dcap_quoteverify.so.$SGX_VER
-    ln -s libsgx_dcap_quoteverify.so.$SGX_VER $out/lib/libsgx_dcap_quoteverify.so.$SGX_MAJOR_VER
-    ln -s libsgx_dcap_quoteverify.so.$SGX_MAJOR_VER $out/lib/libsgx_dcap_quoteverify.so
+  ''
+  + (
+    if stdenv.isDarwin then
+      ''
+        cp $TMPDIR/libsgx_dcap_quoteverify.dylib $out/lib/libsgx_dcap_quoteverify.$SGX_VER.dylib
+        ln -s libsgx_dcap_quoteverify.$SGX_VER.dylib $out/lib/libsgx_dcap_quoteverify.$SGX_MAJOR_VER.dylib
+        ln -s libsgx_dcap_quoteverify.$SGX_MAJOR_VER.dylib $out/lib/libsgx_dcap_quoteverify.dylib
+      ''
+    else
+      ''
+        cp $TMPDIR/libsgx_dcap_quoteverify.so $out/lib/libsgx_dcap_quoteverify.so.$SGX_VER
+        ln -s libsgx_dcap_quoteverify.so.$SGX_VER $out/lib/libsgx_dcap_quoteverify.so.$SGX_MAJOR_VER
+        ln -s libsgx_dcap_quoteverify.so.$SGX_MAJOR_VER $out/lib/libsgx_dcap_quoteverify.so
+      ''
+  )
+  + ''
 
     # Install public headers (DCAP)
     cp QuoteVerification/dcap_quoteverify/inc/sgx_dcap_quoteverify.h $out/include/
@@ -233,6 +320,8 @@ stdenv.mkDerivation {
     platforms = [
       "x86_64-linux"
       "aarch64-linux"
+      "x86_64-darwin"
+      "aarch64-darwin"
     ];
     license = with licenses; [ bsd3 ];
   };
