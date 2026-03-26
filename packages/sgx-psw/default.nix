@@ -1,23 +1,29 @@
-{ stdenv
-, lib
-, fetchurl
-, cmake
-, coreutils
-, curl
-, file
-, makeWrapper
-, nixosTests
-, protobuf
-, python3
-, nixsgx
-, which
-, debug ? false
+{
+  stdenv,
+  lib,
+  fetchurl,
+  cmake,
+  coreutils,
+  curl,
+  file,
+  makeWrapper,
+  nixosTests,
+  protobuf,
+  python3,
+  nixsgx,
+  which,
+  debug ? false,
 }:
 let
   inherit (nixsgx) sgx-sdk;
 in
 stdenv.mkDerivation rec {
-  inherit (sgx-sdk) patches src version versionTag;
+  inherit (sgx-sdk)
+    patches
+    src
+    version
+    versionTag
+    ;
   pname = "sgx-psw";
 
   postUnpack =
@@ -32,15 +38,16 @@ stdenv.mkDerivation rec {
       # Also include the Data Center Attestation Primitives (DCAP) platform
       # enclaves.
       dcap = rec {
-        version = "1.22";
+        version = "1.25";
         filename = "prebuilt_dcap_${version}.tar.gz";
         prebuilt = fetchurl {
           url = "https://download.01.org/intel-sgx/sgx-dcap/${version}/linux/${filename}";
-          hash = "sha256-RTpJQ6epoAN8YQXSJUjJQ5mPaQIiQpStTWFsnspjjDQ=";
+          hash = "sha256-TXQ8xh0q9RKPyKqjMvxoQtIH2lxbhCiwpV+HvQxACaw=";
         };
       };
     in
-    sgx-sdk.postUnpack + ''
+    sgx-sdk.postUnpack
+    + ''
       # Make sure we use the correct version of prebuilt DCAP
       grep -q 'ae_file_name=${dcap.filename}' "$src/external/dcap_source/QuoteGeneration/download_prebuilt.sh" \
         || (echo "Could not find expected prebuilt DCAP ${dcap.filename} in linux-sgx source" >&2 && exit 1)
@@ -64,10 +71,13 @@ stdenv.mkDerivation rec {
     protobuf
   ];
 
+  env.CMAKE_POLICY_VERSION_MINIMUM = "3.5";
+
   hardeningDisable = [
     # causes redefinition of _FORTIFY_SOURCE
     "fortify3"
-  ] ++ lib.optionals debug [
+  ]
+  ++ lib.optionals debug [
     "fortify"
   ];
 
@@ -82,7 +92,8 @@ stdenv.mkDerivation rec {
 
   buildFlags = [
     "psw_install_pkg"
-  ] ++ lib.optionals debug [
+  ]
+  ++ lib.optionals debug [
     "DEBUG=1"
   ];
 
@@ -184,8 +195,12 @@ stdenv.mkDerivation rec {
 
   meta = {
     description = "Intel SGX Architectural Enclave Service Manager";
-    homepage = "https://github.com/intel/linux-sgx";
-    maintainers = with lib.maintainers; [ phlip9 veehaitch citadelcore ];
+    homepage = "https://github.com/intel/confidential-computing.sgx";
+    maintainers = with lib.maintainers; [
+      phlip9
+      veehaitch
+      citadelcore
+    ];
     platforms = [ "x86_64-linux" ];
     license = [ lib.licenses.bsd3 ];
   };

@@ -1,41 +1,42 @@
-{ lib
-, stdenv
-, fetchFromGitHub
-, autoconf
-, automake
-, binutils
-, callPackage
-, cmake
-, file
-, gdb
-, git
-, libtool
-, linkFarmFromDrvs
-, ocaml
-, ocamlPackages
-, openssl
-, perl
-, python3
-, texinfo
-, validatePkgConfig
-, which
-, writeShellApplication
-, writeShellScript
-, writeText
-, debug ? false
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  autoconf,
+  automake,
+  binutils,
+  callPackage,
+  cmake,
+  file,
+  gdb,
+  git,
+  libtool,
+  linkFarmFromDrvs,
+  ocaml,
+  ocamlPackages,
+  openssl,
+  perl,
+  python3,
+  texinfo,
+  validatePkgConfig,
+  which,
+  writeShellApplication,
+  writeShellScript,
+  writeText,
+  debug ? false,
 }:
 stdenv.mkDerivation rec {
   pname = "sgx-sdk";
   # Version as given in se_version.h
-  version = "2.25.100.3";
+  version = "2.28.100.1";
   # Version as used in the Git tag
-  versionTag = "2.25";
+  versionTag = "2.28";
 
   src = fetchFromGitHub {
     owner = "intel";
-    repo = "linux-sgx";
+    repo = "confidential-computing.sgx";
     rev = "sgx_${versionTag}";
-    hash = "sha256-RR+vFTd9ZM6XUn3KgQeUM+xoj1Ava4zQzFYA/nfXyaw=";
+    hash = "sha256-dRLTyIMNHnPmHb+ro2O7UtzR5EkhMXvxR5BKa6kfNhs=";
     fetchSubmodules = true;
   };
 
@@ -50,9 +51,6 @@ stdenv.mkDerivation rec {
     # and applies some patches to the in-repo git submodules. This patch removes
     # the parts that download things, since we can't do that inside the sandbox.
     ./disable-downloads.patch
-
-    # Set the CXX standard for nix builds of sgx-psw
-    ./aesm-cxx-standard.patch
 
     # This patch disable mtime in bundled zip file for reproducible builds.
     #
@@ -146,11 +144,16 @@ stdenv.mkDerivation rec {
       popd
     '';
 
-  env.NIX_CFLAGS_COMPILE = "-Wno-error=missing-include-dirs";
+  env = {
+    NIX_CFLAGS_COMPILE = "-Wno-error=missing-include-dirs";
+    # Bundled OpenMP uses cmake_minimum_required(VERSION 2.8) which CMake 3.30+ rejects
+    CMAKE_POLICY_VERSION_MINIMUM = "3.5";
+  };
 
   buildFlags = [
     "sdk_install_pkg"
-  ] ++ lib.optionals debug [
+  ]
+  ++ lib.optionals debug [
     "DEBUG=1"
   ];
 
@@ -297,8 +300,13 @@ stdenv.mkDerivation rec {
 
   meta = {
     description = "Intel SGX SDK for Linux built with IPP Crypto Library";
-    homepage = "https://github.com/intel/linux-sgx";
-    maintainers = with lib.maintainers; [ phlip9 sbellem arturcygan veehaitch ];
+    homepage = "https://github.com/intel/confidential-computing.sgx";
+    maintainers = with lib.maintainers; [
+      phlip9
+      sbellem
+      arturcygan
+      veehaitch
+    ];
     platforms = [ "x86_64-linux" ];
     license = [ lib.licenses.bsd3 ];
   };

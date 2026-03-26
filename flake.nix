@@ -1,21 +1,22 @@
 {
+  description = "Intel SGX and TDX for nixos";
+
   nixConfig = {
-    extra-substituters = [ "https://static.188.92.12.49.clients.your-server.de/tee-pot" ];
-    extra-trusted-public-keys = [ "tee-pot:SS6HcrpG87S1M6HZGPsfo7d1xJccCGev7/tXc5+I4jg=" ];
+    extra-substituters = [ "https://attic.teepot.org/cache" ];
+    extra-trusted-public-keys = [ "cache:uLQovCi1QU+B4PPXhue3z7y2NqznyEJIsGiENpNZtiI=" ];
   };
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11-small";
 
     snowfall-lib = {
-      url = "github:snowfallorg/lib?ref=c6238c83de101729c5de3a29586ba166a9a65622";
+      url = "github:snowfallorg/lib";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  description = "SGX packages for nixos";
-
-  outputs = inputs:
+  outputs =
+    inputs:
     inputs.snowfall-lib.mkFlake {
       inherit inputs;
       src = ./.;
@@ -27,7 +28,7 @@
       };
 
       outputs-builder = channels: {
-        formatter = channels.nixpkgs.nixpkgs-fmt;
+        formatter = channels.nixpkgs.nixfmt-tree;
       };
     };
 }

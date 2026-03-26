@@ -1,46 +1,46 @@
-{ pkgs
-, lib
-, nixsgx
-, fetchurl
-, fetchpatch
-, bash
-, meson
-, nasm
-, ninja
-, cmake
-, cacert
-, pkg-config
-, autoconf
-, perl
-, gawk
-, bison
-, patchelf
-, protobufc
-, which
-, python3Packages
+{
+  pkgs,
+  lib,
+  nixsgx,
+  bash,
+  meson,
+  nasm,
+  ninja,
+  cmake,
+  cacert,
+  pkg-config,
+  autoconf,
+  perl,
+  gawk,
+  bison,
+  patchelf,
+  protobufc,
+  which,
+  python3Packages,
 }:
 let
   python = pkgs.python3;
 
-  my-python-packages = ps: with ps; [
-    click
-    jinja2
-    pyelftools
-    tomli
-    tomli-w
-    cryptography
-    voluptuous
-  ];
+  my-python-packages =
+    ps: with ps; [
+      click
+      jinja2
+      pyelftools
+      tomli
+      tomli-w
+      cryptography
+      voluptuous
+    ];
 in
 python.pkgs.buildPythonPackage {
   pname = "gramine";
-  version = "1.8";
+  version = "1.9";
 
   src = pkgs.fetchFromGitHub {
     owner = "gramineproject";
     repo = "gramine";
-    rev = "v1.8";
-    hash = "sha256-yz7hVEJAqYQbzdCEVG1c/mVpuBDQtv/MUSCcH60pN5g=";
+    rev = "v1.9";
+    hash = "sha256-6kIqKb/TFXBTeQm+OUfKwA6RftLeRy9q0xwbqqTIkX0=";
     fetchSubmodules = true;
     postFetch = ''
       (
@@ -54,7 +54,10 @@ python.pkgs.buildPythonPackage {
     '';
   };
 
-  outputs = [ "out" "dev" ];
+  outputs = [
+    "out"
+    "dev"
+  ];
 
   postPatch = ''
     patchShebangs --build $(find . -name '*.sh')
@@ -66,15 +69,21 @@ python.pkgs.buildPythonPackage {
     "--buildtype=release"
     "-Ddirect=enabled"
     "-Dsgx=enabled"
-    "-Dsgx_driver=upstream"
     "-Dc_args=-Wno-error=attributes"
     "-Dc_args=-Wno-attributes"
   ];
 
-  env.PERL = lib.getExe perl;
+  env = {
+    PERL = lib.getExe perl;
+    CMAKE_POLICY_VERSION_MINIMUM = "3.5";
+  };
 
   # will be enabled by projects on demand
-  hardeningDisable = [ "fortify" "pie" "stackprotector" ];
+  hardeningDisable = [
+    "fortify"
+    "pie"
+    "stackprotector"
+  ];
 
   postFixup = ''
     set -e
@@ -109,7 +118,6 @@ python.pkgs.buildPythonPackage {
     perl
   ];
 
-
   build-system = with python3Packages; [
     setuptools
     distutils
@@ -119,6 +127,7 @@ python.pkgs.buildPythonPackage {
     protobufc.dev
     protobufc.lib
     bash
+    nixsgx.sgx-dcap.quote_verify
   ];
 
   propagatedBuildInputs = [

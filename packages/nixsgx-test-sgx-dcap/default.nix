@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2024 Matter Labs
-{ pkgs
-, hello
-, isAzure ? false
-, container-name ? "nixsgx-test-sgx-dcap"
-, tag ? "latest"
+{
+  pkgs,
+  hello,
+  isAzure ? false,
+  container-name ? "nixsgx-test-sgx-dcap",
+  tag ? "latest",
 }:
 pkgs.lib.tee.sgxGramineContainer {
   name = container-name;
