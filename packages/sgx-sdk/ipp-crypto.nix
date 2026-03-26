@@ -1,10 +1,11 @@
-{ stdenv
-, fetchFromGitHub
-, cmake
-, nasm
-, openssl
-, python3
-, extraCmakeFlags ? [ ]
+{
+  stdenv,
+  fetchFromGitHub,
+  cmake,
+  nasm,
+  openssl,
+  python3,
+  extraCmakeFlags ? [ ],
 }:
 stdenv.mkDerivation rec {
   pname = "ipp-crypto";
@@ -21,7 +22,8 @@ stdenv.mkDerivation rec {
     "-DARCH=intel64"
     # sgx-sdk now requires FIPS-compliance mode turned on
     "-DIPPCP_FIPS_MODE=on"
-  ] ++ extraCmakeFlags;
+  ]
+  ++ extraCmakeFlags;
 
   # Yes, it seems bad for a cryptography library to trigger this
   # warning. We previously pinned an EOL GCC which avoided it, but this

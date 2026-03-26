@@ -1,17 +1,18 @@
-{ lib
-, stdenv
-, fetchFromGitHub
-, fetchurl
-, cmake
-, boost
-, python3
-, openssl
-, which
-, wget
-, curl
-, zip
-, nixsgx
-, makeWrapper
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  fetchurl,
+  cmake,
+  boost,
+  python3,
+  openssl,
+  which,
+  wget,
+  curl,
+  zip,
+  nixsgx,
+  makeWrapper,
 }:
 stdenv.mkDerivation rec {
   pname = "sgx-dcap";
@@ -235,7 +236,9 @@ stdenv.mkDerivation rec {
 
   postFixup = ''
     wrapProgram "$pck_id_retrieval_tool/bin/PCKIDRetrievalTool" \
-      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ nixsgx.sgx-psw ]}:$ra_uefi/lib:$ra_network/lib"
+      --prefix LD_LIBRARY_PATH : "${
+        lib.makeLibraryPath [ nixsgx.sgx-psw ]
+      }:$ra_uefi/lib:$ra_network/lib"
   '';
 
   nativeBuildInputs = [

@@ -25,33 +25,13 @@ jobs:
 
       - run: nix fmt . -- --check
 
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - uses: cachix/install-nix-action@v31
-        with:
-          install_url: https://releases.nixos.org/nix/nix-2.28.3/install
-          extra_nix_config: |
-            access-tokens = github.com=${{ github.token }}
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= cache:uLQovCi1QU+B4PPXhue3z7y2NqznyEJIsGiENpNZtiI=
-            substituters = https://cache.nixos.org/ https://attic.teepot.org/cache
-            fallback = true
-            sandbox = true
-      - name: Setup Attic cache
-        uses: ryanccn/attic-action@v0
-        with:
-          endpoint: https://attic.teepot.org/
-          cache: cache
-          token: ${{ secrets.ATTIC_TOKEN }}
-
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - uses: cachix/install-nix-action@v31
         with:
-          install_url: https://releases.nixos.org/nix/nix-2.28.3/install
+          install_url: https://releases.nixos.org/nix/nix-2.34.4/install
           extra_nix_config: |
             access-tokens = github.com=${{ github.token }}
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= cache:uLQovCi1QU+B4PPXhue3z7y2NqznyEJIsGiENpNZtiI=

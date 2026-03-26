@@ -7,15 +7,16 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11-small";
 
     snowfall-lib = {
-      url = "github:snowfallorg/lib?ref=c6238c83de101729c5de3a29586ba166a9a65622";
+      url = "github:snowfallorg/lib";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = inputs:
+  outputs =
+    inputs:
     inputs.snowfall-lib.mkFlake {
       inherit inputs;
       src = ./.;
@@ -27,7 +28,7 @@
       };
 
       outputs-builder = channels: {
-        formatter = channels.nixpkgs.nixpkgs-fmt;
+        formatter = channels.nixpkgs.nixfmt-tree;
       };
     };
 }

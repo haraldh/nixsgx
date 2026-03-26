@@ -1,12 +1,13 @@
-{ stdenv
-, callPackage
-, fetchFromGitHub
-, fetchurl
-, lib
-, perl
-, nixsgx
-, which
-, debug ? false
+{
+  stdenv,
+  callPackage,
+  fetchFromGitHub,
+  fetchurl,
+  lib,
+  perl,
+  nixsgx,
+  which,
+  debug ? false,
 }:
 let
   inherit (nixsgx) sgx-sdk;
@@ -52,7 +53,8 @@ stdenv.mkDerivation {
 
   makeFlags = [
     "-C Linux"
-  ] ++ lib.optionals debug [
+  ]
+  ++ lib.optionals debug [
     "DEBUG=1"
   ];
 
@@ -68,15 +70,28 @@ stdenv.mkDerivation {
   # nix run .#sgx-ssl.tests.SIM
   # ```
   passthru.tests = {
-    HW = callPackage ./tests.nix { sgxMode = "HW"; inherit opensslVersion; };
-    SIM = callPackage ./tests.nix { sgxMode = "SIM"; inherit opensslVersion; };
+    HW = callPackage ./tests.nix {
+      sgxMode = "HW";
+      inherit opensslVersion;
+    };
+    SIM = callPackage ./tests.nix {
+      sgxMode = "SIM";
+      inherit opensslVersion;
+    };
   };
 
   meta = {
     description = "Cryptographic library for Intel SGX enclave applications based on OpenSSL";
     homepage = "https://github.com/intel/intel-sgx-ssl";
-    maintainers = with lib.maintainers; [ phlip9 trundle veehaitch ];
+    maintainers = with lib.maintainers; [
+      phlip9
+      trundle
+      veehaitch
+    ];
     platforms = [ "x86_64-linux" ];
-    license = with lib.licenses; [ bsd3 openssl ];
+    license = with lib.licenses; [
+      bsd3
+      openssl
+    ];
   };
 }

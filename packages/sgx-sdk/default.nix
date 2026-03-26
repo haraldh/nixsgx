@@ -1,28 +1,29 @@
-{ lib
-, stdenv
-, fetchFromGitHub
-, autoconf
-, automake
-, binutils
-, callPackage
-, cmake
-, file
-, gdb
-, git
-, libtool
-, linkFarmFromDrvs
-, ocaml
-, ocamlPackages
-, openssl
-, perl
-, python3
-, texinfo
-, validatePkgConfig
-, which
-, writeShellApplication
-, writeShellScript
-, writeText
-, debug ? false
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  autoconf,
+  automake,
+  binutils,
+  callPackage,
+  cmake,
+  file,
+  gdb,
+  git,
+  libtool,
+  linkFarmFromDrvs,
+  ocaml,
+  ocamlPackages,
+  openssl,
+  perl,
+  python3,
+  texinfo,
+  validatePkgConfig,
+  which,
+  writeShellApplication,
+  writeShellScript,
+  writeText,
+  debug ? false,
 }:
 stdenv.mkDerivation rec {
   pname = "sgx-sdk";
@@ -151,7 +152,8 @@ stdenv.mkDerivation rec {
 
   buildFlags = [
     "sdk_install_pkg"
-  ] ++ lib.optionals debug [
+  ]
+  ++ lib.optionals debug [
     "DEBUG=1"
   ];
 
@@ -299,7 +301,12 @@ stdenv.mkDerivation rec {
   meta = {
     description = "Intel SGX SDK for Linux built with IPP Crypto Library";
     homepage = "https://github.com/intel/confidential-computing.sgx";
-    maintainers = with lib.maintainers; [ phlip9 sbellem arturcygan veehaitch ];
+    maintainers = with lib.maintainers; [
+      phlip9
+      sbellem
+      arturcygan
+      veehaitch
+    ];
     platforms = [ "x86_64-linux" ];
     license = [ lib.licenses.bsd3 ];
   };

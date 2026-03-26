@@ -1,36 +1,36 @@
-{ pkgs
-, lib
-, nixsgx
-, fetchurl
-, fetchpatch
-, bash
-, meson
-, nasm
-, ninja
-, cmake
-, cacert
-, pkg-config
-, autoconf
-, perl
-, gawk
-, bison
-, patchelf
-, protobufc
-, which
-, python3Packages
+{
+  pkgs,
+  lib,
+  nixsgx,
+  bash,
+  meson,
+  nasm,
+  ninja,
+  cmake,
+  cacert,
+  pkg-config,
+  autoconf,
+  perl,
+  gawk,
+  bison,
+  patchelf,
+  protobufc,
+  which,
+  python3Packages,
 }:
 let
   python = pkgs.python3;
 
-  my-python-packages = ps: with ps; [
-    click
-    jinja2
-    pyelftools
-    tomli
-    tomli-w
-    cryptography
-    voluptuous
-  ];
+  my-python-packages =
+    ps: with ps; [
+      click
+      jinja2
+      pyelftools
+      tomli
+      tomli-w
+      cryptography
+      voluptuous
+    ];
 in
 python.pkgs.buildPythonPackage {
   pname = "gramine";
@@ -54,7 +54,10 @@ python.pkgs.buildPythonPackage {
     '';
   };
 
-  outputs = [ "out" "dev" ];
+  outputs = [
+    "out"
+    "dev"
+  ];
 
   postPatch = ''
     patchShebangs --build $(find . -name '*.sh')
@@ -76,7 +79,11 @@ python.pkgs.buildPythonPackage {
   };
 
   # will be enabled by projects on demand
-  hardeningDisable = [ "fortify" "pie" "stackprotector" ];
+  hardeningDisable = [
+    "fortify"
+    "pie"
+    "stackprotector"
+  ];
 
   postFixup = ''
     set -e
@@ -110,7 +117,6 @@ python.pkgs.buildPythonPackage {
     which
     perl
   ];
-
 
   build-system = with python3Packages; [
     setuptools

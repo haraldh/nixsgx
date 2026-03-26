@@ -1,7 +1,7 @@
-{ pkgs
-, lib
-, nixsgx
-, ...
+{
+  pkgs,
+  nixsgx,
+  ...
 }:
 pkgs.writeShellScriptBin "restart-aesmd" ''
   ${pkgs.coreutils}/bin/mkdir -p /var/run/aesmd
