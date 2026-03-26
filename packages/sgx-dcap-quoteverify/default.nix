@@ -19,7 +19,7 @@ let
     owner = "intel";
     repo = "confidential-computing.sgx";
     rev = "sgx_2.28";
-    hash = "sha256-dRLTyIMNHnPmHb+ro2O7UtzR5EkhMXvxR5BKa6kfNhs=";
+    hash = "sha256-t/pU+8VGnyKQ1tKvOihgCWWOt/dcjntBtKCRGwYkydo=";
     fetchSubmodules = false;
   };
 in
@@ -204,11 +204,22 @@ stdenv.mkDerivation {
     ln -s libsgx_dcap_quoteverify.so.$SGX_VER $out/lib/libsgx_dcap_quoteverify.so.$SGX_MAJOR_VER
     ln -s libsgx_dcap_quoteverify.so.$SGX_MAJOR_VER $out/lib/libsgx_dcap_quoteverify.so
 
-    # Install public headers
+    # Install public headers (DCAP)
     cp QuoteVerification/dcap_quoteverify/inc/sgx_dcap_quoteverify.h $out/include/
     cp QuoteGeneration/quote_wrapper/common/inc/sgx_ql_quote.h $out/include/
+    cp QuoteGeneration/quote_wrapper/common/inc/sgx_ql_lib_common.h $out/include/
+    cp QuoteGeneration/quote_wrapper/common/inc/sgx_quote_3.h $out/include/
     cp ae/QvE/Include/sgx_qve_header.h $out/include/
     cp ae/QvE/Include/sgx_qve_def.h $out/include/
+
+    # Install SGX SDK headers needed by bindgen / consumers
+    for h in sgx_attributes.h sgx_defs.h sgx_key.h sgx_quote.h \
+             sgx_report.h sgx_report2.h sgx_eid.h sgx_error.h; do
+      cp $SGX_SDK/include/$h $out/include/
+    done
+
+    # Install DCAP headers not in SGX SDK
+    cp QuoteGeneration/pce_wrapper/inc/sgx_pce.h $out/include/
 
     runHook postInstall
   '';
