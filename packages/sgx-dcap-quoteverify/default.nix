@@ -48,6 +48,11 @@ stdenv.mkDerivation {
     unsigned int se_get_threadid(void) { return (unsigned)syscall(__NR_gettid); }
     #endif'
 
+    # config.cpp: use .dylib for the QPL on macOS
+    substituteInPlace QuoteVerification/dcap_quoteverify/linux/config.cpp \
+      --replace-fail '"libdcap_quoteprov.so.1"' '"libdcap_quoteprov.dylib"' \
+      --replace-fail '"libdcap_quoteprov.so"' '"libdcap_quoteprov.dylib"'
+
     # qve_parser.cpp: guard /proc/self/exe with __linux__
     substituteInPlace QuoteVerification/dcap_quoteverify/linux/qve_parser.cpp \
       --replace-fail \
