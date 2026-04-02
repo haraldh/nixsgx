@@ -83,5 +83,5 @@ jobs:
           cache: cache
           token: ${{ secrets.ATTIC_TOKEN }}
 
-      - name: nix build sgx-dcap-quoteverify
-        run: nix build -L .#sgx-dcap-quoteverify
+      - name: nix build sgx-dcap (portable)
+        run: nix build -L .#sgx-dcap.quote_verify .#sgx-dcap.default_qpl
