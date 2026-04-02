@@ -75,10 +75,10 @@ stdenv.mkDerivation {
             ssize_t i = -1;
     #endif'
 
-    # network_wrapper.cpp: RTLD_DEEPBIND is Linux-only, use .dylib for libcurl
+    # network_wrapper.cpp: RTLD_DEEPBIND is Linux-only, use absolute path for libcurl
     substituteInPlace QuoteGeneration/qcnl/linux/network_wrapper.cpp \
       --replace-fail 'RTLD_LAZY | RTLD_DEEPBIND' 'RTLD_LAZY' \
-      --replace-fail '"libcurl.so"' '"libcurl.dylib"'
+      --replace-fail '"libcurl.so"' '"${lib.getLib curl}/lib/libcurl.${soExt}"'
   '';
 
   buildPhase = ''
