@@ -45,6 +45,10 @@ stdenv.mkDerivation {
     curl
   ];
 
+  patches = [
+    ./SGXDataCenterAttestationPrimitives-sgx_default_qcnl_conf.patch
+  ];
+
   postPatch = ''
     patchShebangs --build $(find . -name '*.sh')
   ''
@@ -480,6 +484,10 @@ stdenv.mkDerivation {
       ''
   )
   + ''
+
+    # Install QCNL config file
+    mkdir -p $default_qpl/etc
+    cp QuoteGeneration/qcnl/linux/sgx_default_qcnl.conf $default_qpl/etc/
 
     # --- out (default) output — just a placeholder ---
     mkdir -p $out/share/doc
