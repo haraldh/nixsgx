@@ -1,6 +1,7 @@
 {
-  stdenv,
   lib,
+  pkgs,
+  stdenv,
   fetchurl,
   cmake,
   coreutils,
@@ -8,7 +9,7 @@
   file,
   makeWrapper,
   nixosTests,
-  protobuf,
+  protobufPkg ? pkgs.protobuf_33,
   python3,
   nixsgx,
   which,
@@ -68,7 +69,7 @@ stdenv.mkDerivation rec {
 
   buildInputs = [
     curl
-    protobuf
+    protobufPkg
   ];
 
   env.CMAKE_POLICY_VERSION_MINIMUM = "3.5";
@@ -147,7 +148,7 @@ stdenv.mkDerivation rec {
 
     mkdir $out/bin
     makeWrapper $out/aesm/aesm_service $out/bin/aesm_service \
-      --suffix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ protobuf ]}:$out/aesm \
+      --suffix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ protobufPkg ]}:$out/aesm \
       --chdir "$out/aesm"
 
     # Make sure we didn't forget to handle any files
