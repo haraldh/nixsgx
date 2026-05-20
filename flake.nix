@@ -3,7 +3,7 @@
 
   nixConfig = {
     extra-substituters = [ "https://attic.teepot.org/cache" ];
-    extra-trusted-public-keys = [ "cache:uLQovCi1QU+B4PPXhue3z7y2NqznyEJIsGiENpNZtiI=" ];
+    extra-trusted-public-keys = [ "cache:uBVyXkiuk10QNZcN5y5mIjjtuox79LeIFnqiCzE2TH4=" ];
   };
 
   inputs = {
